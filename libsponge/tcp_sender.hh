@@ -22,6 +22,7 @@ class TCPSender {
 
     //! outbound queue of segments that the TCPSender wants sent
     std::queue<TCPSegment> _segments_out{};
+    std::queue<TCPSegment> _segments_waiting{};
 
     //! retransmission timer for the connection
     unsigned int _initial_retransmission_timeout;
@@ -31,7 +32,15 @@ class TCPSender {
 
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
-
+    uint64_t _ack_seqno{0};
+    uint64_t _bytes_in_flight{0};
+    uint16_t _win_size{0};
+    uint16_t _consecutive_retransmission{0};
+    unsigned int _total_time{0};
+    unsigned int _retransmisson_timeout{0};
+    bool _is_timer_running{false};
+    bool _is_syn{false};
+    bool _is_fin{false};
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
@@ -43,7 +52,8 @@ class TCPSender {
     ByteStream &stream_in() { return _stream; }
     const ByteStream &stream_in() const { return _stream; }
     //!@}
-
+    std::queue<TCPSegment> &segments_waiting() { return _segments_waiting;}
+    const std::queue<TCPSegment> &segments_waiting() const {return _segments_waiting;}
     //! \name Methods that can cause the TCPSender to send a segment
     //!@{
 
@@ -87,6 +97,7 @@ class TCPSender {
     //! \brief relative seqno for the next byte to be sent
     WrappingInt32 next_seqno() const { return wrap(_next_seqno, _isn); }
     //!@}
+    void send_segment(TCPSegment &tcp_segment);
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_SENDER_HH

@@ -1,3 +1,6 @@
+#include "socket.hh"
+
+#include <random>
 const uint16_t portnum = ((std::random_device()()) % 50000) + 1025;
 
 // create a TCP socket, bind it to a local address, and listen

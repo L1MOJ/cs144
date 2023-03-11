@@ -1,3 +1,6 @@
+#include "socket.hh"
+
+#include <array>
 // create a pair of stream sockets
 std::array<int, 2> fds{};
 SystemCall("socketpair", ::socketpair(AF_UNIX, SOCK_STREAM, 0, fds.data()));

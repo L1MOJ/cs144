@@ -16,7 +16,11 @@
 class TCPReceiver {
     //! Our data structure for re-assembling bytes.
     StreamReassembler _reassembler;
-
+    WrappingInt32 _isn;
+    WrappingInt32 _ackno;
+    uint64_t _checkpoint;
+    bool _syn_received;
+    bool _fin_received;
     //! The maximum number of bytes we'll store.
     size_t _capacity;
 
@@ -25,7 +29,7 @@ class TCPReceiver {
     //!
     //! \param capacity the maximum number of bytes that the receiver will
     //!                 store in its buffers at any give time.
-    TCPReceiver(const size_t capacity) : _reassembler(capacity), _capacity(capacity) {}
+    TCPReceiver(const size_t capacity) : _reassembler(capacity), _isn(0), _ackno(0), _checkpoint(0),_syn_received(0),  _fin_received(0),  _capacity(capacity) {}
 
     //! \name Accessors to provide feedback to the remote TCPSender
     //!@{
@@ -49,7 +53,6 @@ class TCPReceiver {
     //! beginning of the window (the ackno).
     size_t window_size() const;
     //!@}
-
     //! \brief number of bytes stored but not yet reassembled
     size_t unassembled_bytes() const { return _reassembler.unassembled_bytes(); }
 

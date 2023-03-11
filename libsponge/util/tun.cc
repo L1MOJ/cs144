@@ -7,7 +7,7 @@
 #include <linux/if.h>
 #include <linux/if_tun.h>
 #include <sys/ioctl.h>
-
+#include <sys/socket.h>
 static constexpr const char *CLONEDEV = "/dev/net/tun";
 
 using namespace std;

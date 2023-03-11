@@ -11,10 +11,13 @@
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
-
+    std::deque < char > _buffer ;
+    std::deque < bool > _flag ;
+    bool _is_eof = false;
+    size_t _eof_index = 0;
+    size_t _unassembled_bytes = 0;
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
-
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
