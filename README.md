@@ -1,73 +1,70 @@
-For build prereqs, see [the CS144 VM setup instructions](https://web.stanford.edu/class/cs144/vm_howto).
+#include "socket.hh"
+#include "util.hh"
 
-## Sponge quickstart
+#include <cstdlib>
+#include <iostream>
 
-To set up your build directory:
+using namespace std;
 
-	$ mkdir -p <path/to/sponge>/build
-	$ cd <path/to/sponge>/build
-	$ cmake ..
+void get_URL(const string &host, const string &path) {
+    // Your code here.
+    auto sc = TCPSocket();
+    auto addr = Address(host,"http");
+    sc.connect(addr);
+    sc.write("GET "+path+" HTTP/1.1\r
+");
+    sc.write("Host: "+host+"\r
+");
+    sc.write("Connection: close\r
+\r
+");
+    sc.shutdown(SHUT_WR);
+    while(!sc.eof()) {
+        printf("%s",sc.read().c_str());
+    }
+    sc.close();
+    // You will need to connect to the "http" service on
+    // the computer whose name is in the "host" string,
+    // then request the URL path given in the "path" string.
 
-**Note:** all further commands listed below should be run from the `build` dir.
+    // Then you'll need to print out everything the server sends back,
+    // (not just one call to read() -- everything) until you reach
+    // the "eof" (end of file).
 
-To build:
+    cerr << "Function called: get_URL(" << host << ", " << path << ").
+";
+    cerr << "Warning: get_URL() has not been implemented yet.
+";
+}
 
-    $ make
+int main(int argc, char *argv[]) {
+    try {
+        if (argc <= 0) {
+            abort();  // For sticklers: don't try to access argv[0] if argc <= 0.
+        }
 
-You can use the `-j` switch to build in parallel, e.g.,
+        // The program takes two command-line arguments: the hostname and "path" part of the URL.
+        // Print the usage message unless there are these two arguments (plus the program name
+        // itself, so arg count = 3 in total).
+        if (argc != 3) {
+            cerr << "Usage: " << argv[0] << " HOST PATH
+";
+            cerr << "\tExample: " << argv[0] << " stanford.edu /class/cs144
+";
+            return EXIT_FAILURE;
+        }
 
-    $ make -j$(nproc)
+        // Get the command-line arguments.
+        const string host = argv[1];
+        const string path = argv[2];
 
-To test (after building; make sure you've got the [build prereqs](https://web.stanford.edu/class/cs144/vm_howto) installed!)
+        // Call the student-written function.
+        get_URL(host, path);
+    } catch (const exception &e) {
+        cerr << e.what() << "
+";
+        return EXIT_FAILURE;
+    }
 
-    $ make check_labN *(replacing N with a checkpoint number)*
-
-The first time you run `make check_lab...`, it will run `sudo` to configure two
-[TUN](https://www.kernel.org/doc/Documentation/networking/tuntap.txt) devices for use during
-testing.
-
-### build options
-
-You can specify a different compiler when you run cmake:
-
-    $ CC=clang CXX=clang++ cmake ..
-
-You can also specify `CLANG_TIDY=` or `CLANG_FORMAT=` (see "other useful targets", below).
-
-Sponge's build system supports several different build targets. By default, cmake chooses the `Release`
-target, which enables the usual optimizations. The `Debug` target enables debugging and reduces the
-level of optimization. To choose the `Debug` target:
-
-    $ cmake .. -DCMAKE_BUILD_TYPE=Debug
-
-The following targets are supported:
-
-- `Release` - optimizations
-- `Debug` - debug symbols and `-Og`
-- `RelASan` - release build with [ASan](https://en.wikipedia.org/wiki/AddressSanitizer) and
-  [UBSan](https://developers.redhat.com/blog/2014/10/16/gcc-undefined-behavior-sanitizer-ubsan/)
-- `RelTSan` - release build with
-  [ThreadSan](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Thread_Sanitizer)
-- `DebugASan` - debug build with ASan and UBSan
-- `DebugTSan` - debug build with ThreadSan
-
-Of course, you can combine all of the above, e.g.,
-
-    $ CLANG_TIDY=clang-tidy-6.0 CXX=clang++-6.0 .. -DCMAKE_BUILD_TYPE=Debug
-
-**Note:** if you want to change `CC`, `CXX`, `CLANG_TIDY`, or `CLANG_FORMAT`, you need to remove
-`build/CMakeCache.txt` and re-run cmake. (This isn't necessary for `CMAKE_BUILD_TYPE`.)
-
-### other useful targets
-
-To generate documentation (you'll need `doxygen`; output will be in `build/doc/`):
-
-    $ make doc
-
-To format (you'll need `clang-format`):
-
-    $ make format
-
-To see all available targets,
-
-    $ make help
+    return EXIT_SUCCESS;
+}
